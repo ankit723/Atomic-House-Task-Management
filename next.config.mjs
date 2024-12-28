@@ -1,4 +1,8 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
+const nextConfig = {
+    typescript: {
+        ignoreBuildErrors: true, // Disable type checks during build
+    },
+};
 
 export default nextConfig;

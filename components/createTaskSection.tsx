@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { useCreateTaskMutation } from "@/app/graphql/generated";
 import { useRouter } from "next/navigation";
+import { toast } from "react-hot-toast";
 
 const CreateTaskSection = () => {
   const router = useRouter();
@@ -33,7 +34,7 @@ const CreateTaskSection = () => {
       setDescription("");
       setStatus("Pending");
 
-      alert("Task created successfully!");
+      toast("Task created successfully!");
       router.push("/");
     } catch (error) {
       console.error("Error creating task:", error);

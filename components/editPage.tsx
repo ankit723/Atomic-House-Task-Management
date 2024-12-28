@@ -4,6 +4,8 @@ import { useGetTasksQuery } from "@/app/graphql/generated";
 import { useUpdateTaskMutation } from "@/app/graphql/generated";
 import { FaSpinner } from "react-icons/fa";
 import { useRouter } from "next/navigation";
+import { toast } from "react-hot-toast";
+
 
 const EditPage = ({ taskId }: { taskId: string }) => {
   const router = useRouter();
@@ -43,7 +45,7 @@ const EditPage = ({ taskId }: { taskId: string }) => {
         description,
         status,
       });
-      alert("Task updated successfully!");
+      toast("Task updated successfully!");
       router.push("/");
     } catch (err) {
       console.error("Error updating task:", err);

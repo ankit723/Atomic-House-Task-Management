@@ -3,7 +3,6 @@ import { useGetTasksQuery, useDeleteTaskMutation } from "@/app/graphql/generated
 import { FaSpinner } from "react-icons/fa"
 import { BiEdit, BiTrash, BiError } from "react-icons/bi"
 import Link from "next/link"
-import { url } from "inspector"
 
 const TaskSection = () => {
     const { data, error }:any = useGetTasksQuery(

@@ -43,7 +43,7 @@ enum Status {
 
 const resolvers = {
   Query :{
-    task: async (_:any, { id }:any) => {
+    task: async (_:unknown, { id }:{id:string}) => {
       if (id) {
         return await prisma.task.findUnique({
           where: { id },
@@ -57,7 +57,7 @@ const resolvers = {
     },
   },  
   Mutation: {
-    createTask: async (_: any, { title, description, status }: { title: string; description?: string, status?: Status }) => {
+    createTask: async (_: unknown, { title, description, status }: { title: string; description?: string, status?: Status }) => {
       return await prisma.task.create({
         data: {
           title,
@@ -69,8 +69,8 @@ const resolvers = {
       });
     },
     updateTask: async (
-      _: any,
-      { id, title, description, status }: { id: string; title?: string; description?: string; status?: string }
+      _: unknown,
+      { id, title, description, status }: { id: string; title?: string; description?: string; status?: Status }
     ) => {
       return await prisma.task.update({
         where: { id },
@@ -82,7 +82,7 @@ const resolvers = {
         },
       });
     },
-    deleteTask: async (_: any, { id }: { id: string }) => {
+    deleteTask: async (_: unknown, { id }: { id: string }) => {
       await prisma.task.delete({ where: { id } });
       return true;
     },
