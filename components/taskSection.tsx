@@ -7,12 +7,12 @@ import Link from "next/link"
 const TaskSection = () => {
     const { data, error }:any = useGetTasksQuery(
         {
-            endpoint: process.env.APP_ENDPOINT || "http://localhost:3000/api/graphql",
+            endpoint: process.env.NEXT_PUBLIC_APP_ENDPOINT || "http://localhost:3000/api/graphql",
         }
     )
 
     const { mutateAsync: deleteTask } = useDeleteTaskMutation(
-        {endpoint: process.env.APP_ENDPOINT || "http://localhost:3000/api/graphql",}
+        {endpoint: process.env.NEXT_PUBLIC_APP_ENDPOINT || "http://localhost:3000/api/graphql",}
     );
 
     const loading = !data && !error

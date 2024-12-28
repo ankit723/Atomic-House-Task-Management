@@ -16,12 +16,12 @@ const EditPage = ({ taskId }: { taskId: string }) => {
   const [errorMessage, setErrorMessage] = useState("");
 
   const { data, error, isSuccess } = useGetTasksQuery(
-    {endpoint: process.env.APP_ENDPOINT || "http://localhost:3000/api/graphql",},
+    {endpoint: process.env.NEXT_PUBLIC_APP_ENDPOINT || "http://localhost:3000/api/graphql",},
     {id: taskId},
   );
 
   const { mutateAsync: updateTask } = useUpdateTaskMutation({
-    endpoint: process.env.APP_ENDPOINT || "http://localhost:3000/api/graphql",
+    endpoint: process.env.NEXT_PUBLIC_APP_ENDPOINT || "http://localhost:3000/api/graphql",
   });
 
   useEffect(() => {

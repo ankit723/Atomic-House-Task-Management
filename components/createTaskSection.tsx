@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { useCreateTaskMutation } from "@/app/graphql/generated";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
+import { env } from "process";
 
 const CreateTaskSection = () => {
   const router = useRouter();
@@ -10,10 +11,10 @@ const CreateTaskSection = () => {
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState("TODO");
   const [errorMessage, setErrorMessage] = useState("");
-  const [isLoading, setIsLoading] = useState(false); // Manual loading state
+  const [isLoading, setIsLoading] = useState(false);
 
   const { mutateAsync: createTask } = useCreateTaskMutation({
-    endpoint: process.env.APP_ENDPOINT || "http://localhost:3000/api/graphql",
+    endpoint: process.env.NEXT_PUBLIC_APP_ENDPOINT || "http://localhost:3000/api/graphql",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
