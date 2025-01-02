@@ -143,7 +143,6 @@ export const useCreateTaskMutation = <
     return useMutation<CreateTaskMutation, TError, CreateTaskMutationVariables, TContext>({
       mutationKey: ['CreateTask'],
       mutationFn: async (variables?: CreateTaskMutationVariables) => {
-      // Simple validation
       if (!variables) {
         throw new Error('No variables provided for the mutation.');
       }
@@ -153,9 +152,7 @@ export const useCreateTaskMutation = <
       if (variables.status === null || variables.status === undefined) {
         throw new Error('The "status" field is required and cannot be null or undefined.');
       }
-      // `description` is optional, so no validation for it
 
-      // Call the fetcher function after validation
       return fetcher<CreateTaskMutation, CreateTaskMutationVariables>(
         dataSource.endpoint,
         dataSource.fetchParams || {},
