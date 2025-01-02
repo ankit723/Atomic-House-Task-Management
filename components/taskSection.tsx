@@ -1,10 +1,31 @@
 'use client'
+import { useState } from "react";
 import { useGetTasksQuery, useDeleteTaskMutation } from "@/app/graphql/generated"
 import { FaSpinner } from "react-icons/fa"
 import { BiEdit, BiTrash, BiError } from "react-icons/bi"
 import Link from "next/link"
 
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog"
+import EditPage from "./editPage"
+import CreateTaskSection from "./createTaskSection"
+import { Button } from "./ui/button"
+import { useQueryClient } from "@tanstack/react-query"
+import toast from "react-hot-toast";
+  
+
 const TaskSection = () => {
+    const queryClient = useQueryClient();
+    const [modelState, setModalState] = useState(false)
+    const [editTask, setEditTask] = useState<any>()
+    const [createModelState, setCreateModalState] = useState(false)
+
     const { data, error }:any = useGetTasksQuery(
         {
             endpoint: process.env.NEXT_PUBLIC_APP_ENDPOINT || "http://localhost:3000/api/graphql",
@@ -12,7 +33,15 @@ const TaskSection = () => {
     )
 
     const { mutateAsync: deleteTask } = useDeleteTaskMutation(
-        {endpoint: process.env.NEXT_PUBLIC_APP_ENDPOINT || "http://localhost:3000/api/graphql",}
+        {endpoint: process.env.NEXT_PUBLIC_APP_ENDPOINT || "http://localhost:3000/api/graphql",},
+        {
+            onSuccess: () => {
+                queryClient.invalidateQueries(['GetTasks']);
+            },
+            onError: (error) => {
+                console.error("Error deleting task:", error)
+            }
+        }
     );
 
     const loading = !data && !error
@@ -27,7 +56,7 @@ const TaskSection = () => {
     const handleDeleteTask = async (id: string) => {
         try {
         await deleteTask({ id });
-        window.location.reload();
+        toast.success("Task deleted successfully");
         console.log("Task deleted successfully");
         } catch (err) {
         console.error("Error deleting task:", err);
@@ -37,10 +66,23 @@ const TaskSection = () => {
 
     return (
         <div className="text-black">
+            <Dialog open={modelState} onOpenChange={setModalState}>
+                    <DialogTrigger></DialogTrigger>
+                    <DialogContent>
+                        <EditPage taskId={editTask?.id} setModelState={setModalState}/>
+                    </DialogContent>
+                </Dialog>
             <div className="flex justify-between items-center mt-7 mb-10">
                 <h1 className="text-2xl font-bold ">Tasks</h1>
+                
+                <Dialog open={createModelState} onOpenChange={setCreateModalState}>
+                    <DialogTrigger><Button>Create new Task</Button></DialogTrigger>
+                    <DialogContent>
+                        <CreateTaskSection setCreateModalState={setCreateModalState}/>
+                    </DialogContent>
+                </Dialog>
 
-                <Link className="bg-blue-500 text-white p-3 rounded-md" href={`/create-task`}>Create new Task</Link>
+                
             </div>
             <div className="grid grid-cols-1 gap-4">
                 {data?.tasks.map((task:any) => (
@@ -52,8 +94,11 @@ const TaskSection = () => {
                         </div>
 
                         <div className="flex gap-1 items-center">
-                            <Link href={`/edit-task/${task.id}`}><BiEdit className="text-blue-500 text-2xl" /></Link>
-                            <button onClick={()=>handleDeleteTask(task.id)}><BiTrash className="text-red-500 text-2xl" /></button>
+                            <BiEdit className="text-blue-500 text-2xl" onClick={()=>{
+                                setEditTask(task)
+                                setModalState(true)
+                            }}/>
+                            <Button onClick={()=>handleDeleteTask(task.id)}><BiTrash className="text-red-500 text-2xl" /></Button>
                         </div>
                     </div>
                 ))}

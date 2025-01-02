@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Toaster } from "react-hot-toast";
 import './globals.css';
-import QueryHookProvider from '@/components/QueryHookProvider';
+import QueryHookProvider from '@/providers/QueryHookProvider';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

@@ -3,9 +3,20 @@ import React, { useState } from "react";
 import { useCreateTaskMutation } from "@/app/graphql/generated";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
-import { env } from "process";
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Button } from "@/components/ui/button"
+import { useQueryClient } from "@tanstack/react-query";
 
-const CreateTaskSection = () => {
+const CreateTaskSection = ({setCreateModalState}:{setCreateModalState:any}) => {
+  const queryClient = useQueryClient();
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -13,9 +24,17 @@ const CreateTaskSection = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const { mutateAsync: createTask } = useCreateTaskMutation({
-    endpoint: process.env.NEXT_PUBLIC_APP_ENDPOINT || "http://localhost:3000/api/graphql",
-  });
+  const { mutateAsync: createTask } = useCreateTaskMutation(
+    {endpoint: process.env.NEXT_PUBLIC_APP_ENDPOINT || "http://localhost:3000/api/graphql"},
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(['GetTasks']);
+      },
+      onError: (error) => {
+        console.error("Failed to create task:", error);
+      },
+    }
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,25 +47,23 @@ const CreateTaskSection = () => {
         description,
         status
       };
-
       await createTask(variables);
-
       setTitle("");
       setDescription("");
       setStatus("Pending");
-
-      toast("Task created successfully!");
-      router.push("/");
+      toast.success("Task created successfully!");
     } catch (error) {
+      toast.error("Failed to create task. Please try again.");
       console.error("Error creating task:", error);
       setErrorMessage("Failed to create task. Please try again.");
     } finally {
       setIsLoading(false);
+      setCreateModalState(false);
     }
   };
 
   return (
-    <div className="w-full max-w-lg mx-auto bg-white p-6 rounded-md shadow-md text-black">
+    <div className="text-black">
       <h1 className="text-2xl font-bold mb-4">Create Task</h1>
       {errorMessage && (
         <div className="text-red-500 text-sm mb-4">{errorMessage}</div>
@@ -56,12 +73,11 @@ const CreateTaskSection = () => {
           <label className="block text-sm font-medium text-gray-700">
             Title
           </label>
-          <input
+          <Input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
             placeholder="Enter task title"
           />
         </div>
@@ -69,36 +85,40 @@ const CreateTaskSection = () => {
           <label className="block text-sm font-medium text-gray-700">
             Description
           </label>
-          <textarea
+          <Textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             required
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
             placeholder="Enter task description"
-          ></textarea>
+          ></Textarea>
         </div>
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700">
             Status
           </label>
-          <select
+          <Select
             value={status}
-            onChange={(e) => setStatus(e.target.value)}
+            onValueChange={(value) => setStatus(value)} // Use onValueChange instead of onChange
             required
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
           >
-            <option value="TODO">Todo</option>
-            <option value="IN_PROGRESS">In Progress</option>
-            <option value="DONE">Done</option>
-          </select>
+            <SelectTrigger >
+              <SelectValue placeholder="Select status" /> {/* Optional placeholder */}
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="TODO">Todo</SelectItem>
+              <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
+              <SelectItem value="DONE">Done</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="w-full bg-blue-500 text-white p-3 rounded-md hover:bg-blue-600 focus:ring-2 focus:ring-blue-400 disabled:opacity-50"
-        >
-          {isLoading ? "Creating..." : "Create Task"}
-        </button>
+        <div className="w-full flex justify-end">
+          <Button
+            type="submit"
+            disabled={isLoading}
+            >
+            {isLoading ? "Creating..." : "Create Task"}
+          </Button>
+        </div>
       </form>
     </div>
   );

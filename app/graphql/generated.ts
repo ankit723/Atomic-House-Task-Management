@@ -8,13 +8,6 @@ export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> =
 export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 
 function fetcher<TData, TVariables>(endpoint: string, requestInit: RequestInit, query: string, variables?: TVariables) {
-  console.log('fetcher');
-  console.log('endpoint', endpoint);
-  console.log('requestInit', requestInit);
-  console.log('query', query);
-  console.log('variables', variables);
-  console.log('requestInit.headers', requestInit.headers);
-  console.log('JSON.stringify({ query, variables })', JSON.stringify({ query, variables }));
   return async (): Promise<TData> => {
     const res = await fetch(endpoint, {
       method: 'POST',
@@ -149,7 +142,27 @@ export const useCreateTaskMutation = <
     
     return useMutation<CreateTaskMutation, TError, CreateTaskMutationVariables, TContext>({
       mutationKey: ['CreateTask'],
-      mutationFn: (variables?: CreateTaskMutationVariables) => fetcher<CreateTaskMutation, CreateTaskMutationVariables>(dataSource.endpoint, dataSource.fetchParams || {}, CreateTaskDocument, variables)(),
+      mutationFn: async (variables?: CreateTaskMutationVariables) => {
+      // Simple validation
+      if (!variables) {
+        throw new Error('No variables provided for the mutation.');
+      }
+      if (variables.title === null || variables.title === undefined) {
+        throw new Error('The "title" field is required and cannot be null or undefined.');
+      }
+      if (variables.status === null || variables.status === undefined) {
+        throw new Error('The "status" field is required and cannot be null or undefined.');
+      }
+      // `description` is optional, so no validation for it
+
+      // Call the fetcher function after validation
+      return fetcher<CreateTaskMutation, CreateTaskMutationVariables>(
+        dataSource.endpoint,
+        dataSource.fetchParams || {},
+        CreateTaskDocument,
+        variables
+      )();
+    },
       ...options
     })};
 
@@ -196,7 +209,24 @@ export const useUpdateTaskMutation = <
     
     return useMutation<UpdateTaskMutation, TError, UpdateTaskMutationVariables, TContext>({
       mutationKey: ['UpdateTask'],
-      mutationFn: (variables?: UpdateTaskMutationVariables) => fetcher<UpdateTaskMutation, UpdateTaskMutationVariables>(dataSource.endpoint, dataSource.fetchParams || {}, UpdateTaskDocument, variables)(),
+      mutationFn: async (variables?: UpdateTaskMutationVariables) => {
+        if (!variables) {
+          throw new Error('No variables provided for the mutation.');
+        }
+        if (variables.title === null || variables.title === undefined) {
+          throw new Error('The "title" field is required and cannot be null or undefined.');
+        }
+        if (variables.status === null || variables.status === undefined) {
+          throw new Error('The "status" field is required and cannot be null or undefined.');
+        }
+  
+        return fetcher<UpdateTaskMutation, UpdateTaskMutationVariables>(
+          dataSource.endpoint,
+          dataSource.fetchParams || {},
+          UpdateTaskDocument,
+          variables
+        )();
+      },
       ...options
     })};
 
